@@ -44,6 +44,8 @@ export async function getCachedData(env, forceUpdate = false) {
 export async function handleSearch(request, env) {
     const url = new URL(request.url);
     const query = url.searchParams.get("query");
+    const isFormSubmit = url.searchParams.get("isFormSubmit") === "true"; // Parameter baru
+    
     if (!query) return new Response("<p style='color: red;'>❌ Masukkan query!</p>", { status: 400 });
 
     let data = await getCachedData(env);
@@ -59,8 +61,12 @@ export async function handleSearch(request, env) {
     resultHtml += "</div>";
     
     const response = new Response(resultHtml, { headers: { "Content-Type": "text/html" } });
-    if (SEND_LOG === "telegram") await logSearch_telegram(env, request, query);
-    else if (SEND_LOG === "kv") await logSearch(env, request, query);
+    
+    // Hanya kirim log jika dari tombol submit
+    if (isFormSubmit) {
+        if (SEND_LOG === "telegram") await logSearch_telegram(env, request, query);
+        else if (SEND_LOG === "kv") await logSearch(env, request, query);
+    }
     
     return response;
 }

@@ -34,57 +34,59 @@ updateClock();
            bingContainer.style.display = "none";
          }
   
-function searchData(page) {
-            let query = document.getElementById('queryInput').value.trim();
-            let resultsContainer = document.getElementById("searchResults");
-  
-            if (!query) {
-              showToast("Masukkan nama barang terlebih dahulu!");
-              return;
-            }
-              
-  
-            resultsContainer.innerHTML = "<i>🔍 Mencari data...</i";
-  
-            fetch(\`/\${page}?query=\${encodeURIComponent(query)}\`)
-              .then(response => response.text())
-              .then(resultHtml => {
-                resultsContainer.innerHTML = resultHtml.trim() ? resultHtml : "<marquee>❌ Data tidak ditemukan.</marquee>";
-              })
-              .catch(() => {
-                resultsContainer.innerHTML = "<p class='no-result'>⚠️ Gagal mengambil data.</p>";
-              });
-          }
-  
-          document.getElementById('searchForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            searchData('search');
-          });
+function searchData(page, isFormSubmit = false) {
+    let query = document.getElementById('queryInput').value.trim();
+    let resultsContainer = document.getElementById("searchResults");
 
-         function debounce(func, delay) {
-            let timer;
-            return function () {
-               clearTimeout(timer);
-               timer = setTimeout(() => func.apply(this, arguments), delay);
-            };
-          }
+    if (!query) {
+        showToast("Masukkan nama barang terlebih dahulu!");
+        return;
+    }
+    
+    resultsContainer.innerHTML = "<i>🔍 Mencari data...</i>";
 
-         document.getElementById("queryInput").addEventListener("input", debounce(() => {
-             let query = document.getElementById("queryInput").value.trim();
+    fetch(\`/\${page}?query=\${encodeURIComponent(query)}\`)
 
-             if (query.length < 3) {
-                 document.getElementById('searchResults').innerHTML = ""; // Hapus hasil pencarian
-                 bingContainer.innerHTML = "";
-           bingContainer.style.display = "none";
-                 return;
-              }
-              
+    fetch(\`/\${page}?query=\${encodeURIComponent(query)}&isFormSubmit=\${isFormSubmit}\`)
+        .then(response => response.text())
+        .then(resultHtml => {
+            resultsContainer.innerHTML = resultHtml.trim() ? resultHtml : "<marquee>❌ Data tidak ditemukan.</marquee>";
+        })
+        .catch(() => {
+            resultsContainer.innerHTML = "<p class='no-result'>⚠️ Gagal mengambil data.</p>";
+        });
+}
 
+document.getElementById('searchForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    searchData('search', true); // Kirim true untuk isFormSubmit
+});
 
-             if (query.length >= 3 && SEND_LOG === "kv") {  // Jalankan hanya jika input ≥ 3 karakter
-                 searchData("search");
-              }
-          }, 300)); // Delay 300ms lebih optimal
+function debounce(func, delay) {
+    let timer;
+    return function () {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, arguments), delay);
+    };
+}
+
+document.getElementById("queryInput").addEventListener("input", debounce(() => {
+    let query = document.getElementById("queryInput").value.trim();
+    let bingContainer = document.getElementById("bingContainer");
+
+    if (query.length < 3) {
+        document.getElementById('searchResults').innerHTML = "";
+        if (bingContainer) {
+            bingContainer.innerHTML = "";
+            bingContainer.style.display = "none";
+        }
+        return;
+    }
+
+    if (query.length >= 3) {
+        searchData("search", false); // Kirim false untuk isFormSubmit
+    }
+}, 300));
 
 
 function copyToClipboard(text) {

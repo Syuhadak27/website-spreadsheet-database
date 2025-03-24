@@ -1,6 +1,6 @@
 export function handleAdminAuth(request) {
     const url = new URL(request.url);
-    const adminCredentials = { username: "admin", password: "123" };
+    const adminCredentials = { username: "admin", password: "syd" };
   
     if (url.pathname === "/login-admin") {
       const username = url.searchParams.get("username");
