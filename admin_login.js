@@ -1,6 +1,11 @@
+import { config } from "./config";
+
+const admin_un = config.ADMIN_USERNAME;
+const admin_pw = config.ADMIN_PASWORD;
+
 export function handleAdminAuth(request) {
     const url = new URL(request.url);
-    const adminCredentials = { username: "admin", password: "syd" };
+    const adminCredentials = { username: `${admin_un}`, password: `${admin_pw}` };
   
     if (url.pathname === "/login-admin") {
       const username = url.searchParams.get("username");
